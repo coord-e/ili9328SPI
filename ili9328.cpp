@@ -1,5 +1,7 @@
 #include "ili9328.h"
 
+SPISettings setting(4000000, MSBFIRST, SPI_MODE3);
+
 ili9328SPI::ili9328SPI(uint8_t cs, uint8_t reset) : Adafruit_GFX(TFT_WIDTH, TFT_HEIGHT)
 {
   CSpin = cs;
@@ -13,9 +15,6 @@ void ili9328SPI::begin(void)
   pinMode(CSpin, OUTPUT);
   pinMode(RSTpin, OUTPUT);
   SPI.begin();
-  SPI.setClockDivider(SPI_CLOCK_DIV2);
-  SPI.setBitOrder(MSBFIRST);
-  SPI.setDataMode(SPI_MODE2);
   init();
 }
 
@@ -85,6 +84,7 @@ void ili9328SPI::init(void)
 
 void ili9328SPI::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 {
+  SPI.beginTransaction(setting);
   setblock(x, x + w, y, y + h);
   for (uint16_t i = 0; i < w + 1; i++)
   {
@@ -93,27 +93,33 @@ void ili9328SPI::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t c
       writedat16(color);
     }
   }
+  SPI.endTransaction();
 }
 
 void ili9328SPI::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color)
-{
+{  
+  SPI.beginTransaction(setting);
   setblock(x, x, y, y + h);
   for (uint16_t j = 0; j < h + 1; j++)
   {
     writedat16(color);
   }
+  SPI.endTransaction();
 }
 
 void ili9328SPI::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color)
 {
+  SPI.beginTransaction(setting);
   setblock(x, x + w, y, y);
   for (uint16_t j = 0; j < w + 1; j++)
   {
     writedat16(color);
   }
+  SPI.endTransaction();
 }
 
 void ili9328SPI::drawPixel(int16_t x, int16_t y, uint16_t color) {
+  SPI.beginTransaction(setting);
   //NOT WORKING CODE
   /*int16_t rx, ry;
   switch (rotation) {
@@ -138,6 +144,7 @@ void ili9328SPI::drawPixel(int16_t x, int16_t y, uint16_t color) {
   */
   setblock(x, x, y, y);
   writedat16(color);
+  SPI.endTransaction();
 }
 
 void ili9328SPI::setRotation(uint8_t x){
@@ -171,8 +178,10 @@ void ili9328SPI::setblock(uint16_t x0, uint16_t x1, uint16_t y0, uint16_t y1)
 }
 void ili9328SPI::writereg16(uint16_t com, uint16_t dat)
 {
+  SPI.beginTransaction(setting);
   writecom16(com);
   writedat16(dat);
+  SPI.endTransaction();
 }
 void ili9328SPI::writecom16(uint16_t com)
 {
@@ -181,6 +190,7 @@ void ili9328SPI::writecom16(uint16_t com)
   WRITE16(0x70);
   WRITE16(com >> 8);
   WRITE16(com);
+  
   CS_HIGH;
 }
 void ili9328SPI::writedat16(uint16_t dat)
@@ -190,5 +200,6 @@ void ili9328SPI::writedat16(uint16_t dat)
   WRITE16(0x72);
   WRITE16(dat >> 8);
   WRITE16(dat);
+  
   CS_HIGH;
 }

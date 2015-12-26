@@ -1,6 +1,6 @@
 #include "ili9328.h"
 
-SPISettings setting(4000000, MSBFIRST, SPI_MODE3);
+SPISettings setting(8000000, MSBFIRST, SPI_MODE3);
 
 ili9328SPI::ili9328SPI(uint8_t cs, uint8_t reset) : Adafruit_GFX(TFT_WIDTH, TFT_HEIGHT)
 {
@@ -153,7 +153,7 @@ void ili9328SPI::setRotation(uint8_t x){
 }
 
 uint16_t ili9328SPI::color565(uint8_t r, uint8_t g, uint8_t b) {
-  uint8_t rb, gb, bb;
+  uint16_t rb, gb, bb;
   rb = (r & 0xF8) << 8;
   gb = (g & 0xFC) << 3;
   bb = b >> 3;
